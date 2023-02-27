@@ -1,16 +1,18 @@
 import random
 import math
 
+
 def evaluarSolucion(datos, solucion):
     longitud = 0
     for i in range(len(solucion)):
         longitud += datos[solucion[i - 1]][solucion[i]]
     return longitud
 
+
 def obtenerVecino(solucion, datos):
-    ##Obtención de los vecinos
+    # Obtención de los vecinos
     vecinos = []
-    l=len(solucion)
+    l = len(solucion)
     for i in range(l):
         for j in range(i+1, l):
             n = solucion.copy()
@@ -18,16 +20,17 @@ def obtenerVecino(solucion, datos):
             n[j] = solucion[i]
             vecinos.append(n)
 
-    ##Obtengo un vecino aleatorio
-    vecino=vecinos[random.randint(0, len(vecinos) - 1)]
+    # Obtengo un vecino aleatorio
+    vecino = vecinos[random.randint(0, len(vecinos) - 1)]
     longitud = evaluarSolucion(datos, vecino)
 
     return vecino, longitud
 
-def simAnnealing(datos,t0):
-    t=t0
-    l=len(datos)
-    ##Creamos una solucion aleatoria
+
+def simAnnealing(datos, t0, parada, funcion):
+    t = t0
+    l = len(datos)
+    # Creamos una solucion aleatoria
     ciudades = list(range(l))
     solucion = []
     for i in range(l):
@@ -35,12 +38,10 @@ def simAnnealing(datos,t0):
         solucion.append(ciudad)
         ciudades.remove(ciudad)
     longitud = evaluarSolucion(datos, solucion)
-    print("Longitud de la ruta: ", longitud)
-    print("Temperatura: ", t)
 
-    it=0
-    while t > 0.05:
-        ##Obtenemos un vecino al azar
+    it = 0
+    while t > parada:
+        # Obtenemos un vecino al azar
         vecino = obtenerVecino(solucion, datos)
         incremento = vecino[1]-longitud
 
@@ -51,25 +52,25 @@ def simAnnealing(datos,t0):
             longitud = vecino[1]
             solucion = vecino[0]
 
-        it+=1
-        t=0.99*t ##Función de enfriamiento 
-        print("Longitud de la ruta: ", longitud)
-        print("Temperatura: ", t)
-    return solucion, longitud
+        it += 1
+        if(funcion==1):
+            t = enfriamiento(t)
+        elif(funcion==2):
+            t = enfriamientoLog(t0, it)
+        elif(funcion==3):
+            t = enfriamientoGeo(t0, it)
 
-def main():
-    datos = [
-        [0, 400, 500, 300],
-        [400, 0, 300, 500],
-        [500, 300, 0, 400],
-        [300, 500, 400, 0]
-    ]
-    t0=10
+    return solucion, longitud, it
 
-    s=simAnnealing(datos,t0)
-    print("--------------")
-    print("Solucion final: ",s[0])
-    print("Longitud de la ruta final: ",s[1])
 
-if __name__ == "__main__":
-    main()
+def enfriamiento(t):
+    a = 0.99
+    return a*t
+
+def enfriamientoLog(t0, it):
+    a = 0.99
+    return (a*t0)/(math.log(1+it))
+
+def enfriamientoGeo(t0, it):
+    a = 0.99
+    return t0*a**it
