@@ -2,6 +2,9 @@ import random
 import time
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.interpolate import interp1d
+import itertools
+
 
 def evaluarSolucion(datos, solucion):
     longitud = 0
@@ -102,7 +105,7 @@ def main():
         {'nombre': 'gr17_d', 'nCiudades': 17, 'distanciaMinima': 2085},
         {'nombre': 'fri26_d', 'nCiudades': 26, 'distanciaMinima': 937},
         {'nombre': 'dantzig42_d', 'nCiudades': 42, 'distanciaMinima': 699},
-        {'nombre': 'att48_d', 'nCiudades': 48, 'distanciaMinima': 33523},
+        {'nombre': 'att48_d', 'nCiudades': 48, 'distanciaMinima': 33523}
     ]
 
     datosObtenidosMedios = []
@@ -161,7 +164,11 @@ def main():
         probabilidadOptimoPlot.append(datosObtenidosMedios[i]['probabilidadOptimo'])
         varianzaPlot.append(datosObtenidosMedios[i]['varianza'])
         nCiudades.append(datostxt[i]['nCiudades'])
-        
+
+    nCiudades_new = np.linspace(min(nCiudades), max(nCiudades), 100)
+
+    f_tiempoEjecucionPlot = interp1d(nCiudades, tiempoEjecucionPlot, kind='cubic')
+    plt.plot(nCiudades_new, f_tiempoEjecucionPlot(nCiudades_new))
     plt.plot(nCiudades, tiempoEjecucionPlot)
     plt.xlabel('Número de ciudades')
     plt.ylabel('Tiempo de ejecución')
@@ -169,6 +176,8 @@ def main():
     plt.savefig('tiempoEjecucion.eps', format='eps')
     plt.show()
 
+    f_errorAbsolutoPlot = interp1d(nCiudades, errorAbsolutoPlot, kind='cubic')
+    plt.plot(nCiudades_new, f_errorAbsolutoPlot(nCiudades_new))
     plt.plot(nCiudades, errorAbsolutoPlot)
     plt.xlabel('Número de ciudades')
     plt.ylabel('Error absoluto')
@@ -176,6 +185,8 @@ def main():
     plt.savefig('errorAbsoluto.eps', format='eps')
     plt.show()
 
+    f_errorRelativoPlot = interp1d(nCiudades, errorRelativoPlot, kind='cubic')
+    plt.plot(nCiudades_new, f_errorRelativoPlot(nCiudades_new))
     plt.plot(nCiudades, errorRelativoPlot)
     plt.xlabel('Número de ciudades')
     plt.ylabel('Error relativo')
@@ -183,6 +194,8 @@ def main():
     plt.savefig('errorRelativo.eps', format='eps')
     plt.show()
 
+    f_nIteracionesPlot = interp1d(nCiudades, nIteracionesPlot, kind='cubic')
+    plt.plot(nCiudades_new, f_nIteracionesPlot(nCiudades_new))
     plt.plot(nCiudades, nIteracionesPlot)
     plt.xlabel('Número de ciudades')
     plt.ylabel('Número de iteraciones')
@@ -190,6 +203,8 @@ def main():
     plt.savefig('nIteraciones.eps', format='eps')
     plt.show()
 
+    f_probabilidadOptimoPlot = interp1d(nCiudades, probabilidadOptimoPlot, kind='cubic')
+    plt.plot(nCiudades_new, f_probabilidadOptimoPlot(nCiudades_new))
     plt.plot(nCiudades, probabilidadOptimoPlot)
     plt.xlabel('Número de ciudades')
     plt.ylabel('Probabilidad de encontrar la solución óptima')
@@ -197,23 +212,17 @@ def main():
     plt.savefig('probabilidadOptimo.eps', format='eps')
     plt.show()
 
+    f_varianzaPlot = interp1d(nCiudades, varianzaPlot, kind='cubic')
+    plt.plot(nCiudades_new, f_varianzaPlot(nCiudades_new))
     plt.plot(nCiudades, varianzaPlot)
     plt.xlabel('Número de ciudades')
     plt.ylabel('Varianza')
     plt.title('Varianza por número de ciudades')
     plt.savefig('varianza.eps', format='eps')
     plt.show()
-
-
-    # print("Vamos a realizar 5 saltos para encontrar soluciones optimas... ")
-
-    # p = saltos(datos)
         
-
-
 def leerDatos(ruta):
     return np.genfromtxt(ruta, delimiter=None)
-
 
 def calcularProbabilidad(datosObtenidos, n):
     optimos = 0
@@ -222,13 +231,11 @@ def calcularProbabilidad(datosObtenidos, n):
             optimos += 1
     return optimos/n
 
-
 def calcularVarianza(datosObtenidos, n):
     sum = 0
     for fil in range(0, n):
         sum += datosObtenidos[fil]['errorRelativo']**2
     return sum/n
-
 
 if __name__ == "__main__":
     main()
